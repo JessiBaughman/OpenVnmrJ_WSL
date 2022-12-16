@@ -16,7 +16,7 @@
 ###   Configuration   ###
 #########################
 
-$defaultWSL = "Ubuntu" # which WSL distro to use/install by default
+$defaultWSL = "Ubuntu-20.04" # which WSL distro to use/install by default
 $defaultWSLlink = "https://aka.ms/wslubuntu" # link to default distro (See: https://docs.microsoft.com/en-us/windows/wsl/install-manual)
 $minDist = 20 # minimum int version of Ubuntu supported
 $wslgBuild = 21364 # First build of Windows to incorporte WSLg
@@ -948,7 +948,7 @@ function installController {
             }
             echo "-----------------------------"
             do { # Verify number input
-                $whichUbuntu = Read-Host -Prompt "Select distribution to use"
+                $whichUbuntu = Read-Host -Prompt "Select distribution to use (Note: Only version 20.04 is supported)"
                 $value = $whichUbuntu -as [Int]
                 $ok = $value -ne $NULL
                 if (-not $ok) {Write-Host "Enter digit only"}
