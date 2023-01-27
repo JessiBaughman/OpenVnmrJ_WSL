@@ -691,7 +691,8 @@ function installOVJ([string]$distribution) {
     if ($installerRadioButton2.Checked) {$ovjInstaller = $installerTextBox.Text} # Use own installer
     else { # Download latest release
         # Get link for current DDR release
-        $latestOVJ = "https://github.com"+ ((Invoke-WebRequest "https://github.com/OpenVnmrJ/OpenVnmrJ/releases/latest").Links.Href | Select-String "/OpenVnmrJ/OpenVnmrJ/releases/download/OpenVnmrJ.*DDR.zip")
+        $latestOVJver = ((Invoke-WebRequest "https://github.com/OpenVnmrJ/OpenVnmrJ/releases/latest").Links.Href | Select-String "/OpenVnmrJ/OpenVnmrJ/releases/tag").ToString().split('/')[-1]
+        $latestOVJ = "https://github.com"+ ((Invoke-WebRequest "https://github.com/OpenVnmrJ/OpenVnmrJ/releases/expanded_assets/$latestOVJver").Links.Href | Select-String "/OpenVnmrJ/OpenVnmrJ/releases/download/OpenVnmrJ.*DDR.zip")
         # Set installer file path
         $ovjInstaller = "$ovjWSLfolder\" + [System.IO.Path]::GetFileName($latestOVJ)
         Write-Host "Downloading",([System.IO.Path]::GetFileName($latestOVJ)),"..." -nonewline # e.g. Downloading OpenVnmrJ_3.1_DDR.zip...
