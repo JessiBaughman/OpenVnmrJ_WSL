@@ -558,6 +558,10 @@ function setupUbuntu([string]$distribution) {
 	echo "Configuring $distribution";echo ""
 
     echo "Updating $distribution"
+    if ($winBuild -ge $wslgBuild) { # Windows with WSLg support (11+)
+    	wsl -d $distribution --update # Enable GUI support (WSLg)
+	wsl --shutdown # "reboot"
+    }
     wsl -d $distribution -u root /bin/bash -lic "apt update;apt upgrade -y"
     wsl --shutdown # "reboot"
     echo ""
