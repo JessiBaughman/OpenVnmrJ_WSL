@@ -892,10 +892,14 @@ function createShorcuts([string]$distribution) {
             $shortcutAdminS.TargetPath = $batFileAdmin
         }
         else { # Windows 11 - launch OpenVnmrJ directly
-            $shortcutD.TargetPath = 'C:\WINDOWS\system32\wsl.exe -d '+$distribution+' /bin/bash -lic "vnmrj; sleep 3"'
-            $shortcutAdminD.TargetPath = 'C:\WINDOWS\system32\wsl.exe -d '+$distribution+'-u vnmr1 /bin/bash -lic "vnmrj admin; sleep 3"'
-            $shortcutS.TargetPath = 'C:\WINDOWS\system32\wsl.exe -d '+$distribution+' /bin/bash -lic "vnmrj; sleep 3"'
-            $shortcutAdminS.TargetPath = 'C:\WINDOWS\system32\wsl.exe -d '+$distribution+'-u vnmr1 /bin/bash -lic "vnmrj admin; sleep 3"'
+            $shortcutD.TargetPath = 'C:\WINDOWS\system32\wsl.exe'
+	    $shortcutD.Arguments = '-d '+$distribution+' /bin/bash -lic "vnmrj; sleep 3"'
+            $shortcutAdminD.TargetPath = 'C:\WINDOWS\system32\wsl.exe'
+	    $shortcutAdminD.Arguments = '-d '+$distribution+' -u vnmr1 /bin/bash -lic "vnmrj admin; sleep 3"'
+            $shortcutS.TargetPath = 'C:\WINDOWS\system32\wsl.exe'
+	    $shortcutS.Arguments = '-d '+$distribution+' /bin/bash -lic "vnmrj; sleep 3"'
+            $shortcutAdminS.TargetPath = 'C:\WINDOWS\system32\wsl.exe'
+	    $shortcutAdminS.Arguments = '-d '+$distribution+' -u vnmr1 /bin/bash -lic "vnmrj admin; sleep 3"'
         }
 
         if ($desktopCheckBox.Checked) {
