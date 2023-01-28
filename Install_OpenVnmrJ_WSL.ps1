@@ -8,9 +8,11 @@
 #                                                                          #
 #      * Right-click on this file and select Run with PowerShell           #
 #                                                                          #
+#   Troubleshooting see: https://github.com/JessiBaughman/OpenVnmrJ_WSL    #
+#                                                                          #
 ############################################################################
 
-# Last update: August 8, 2022
+# Last update: January 27, 2023
 
 #########################
 ###   Configuration   ###
