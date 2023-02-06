@@ -12,7 +12,7 @@
 #                                                                          #
 ############################################################################
 
-# Last update: January 27, 2023
+# Last update: February 6, 2023
 
 #########################
 ###   Configuration   ###
@@ -550,6 +550,11 @@ function setupUbuntu([string]$distribution) {
     wsl -d $distribution -u root usermod --append --groups sudo vnmr1
     echo ""
 
+    # Update WSL to convert to WSL 2 on Windows 10 and install WSLg support on Windows 11
+    echo "Updating WSL"
+    wsl --update
+    wsl --shutdown
+    
     # Convert distribution to WSL 2 if currently WSL 1 (Vnmrbg won't run in WSL 1)
     if ((((wsl -l -v) -replace "`0" | Select-String -SimpleMatch "$distribution ") -replace '.* ') -eq 1) {
         echo "Converting $distribution to WSL 2"
@@ -560,10 +565,6 @@ function setupUbuntu([string]$distribution) {
 	echo "Configuring $distribution";echo ""
 
     echo "Updating $distribution"
-    if ($winBuild -ge $wslgBuild) { # Windows with WSLg support (11+)
-    	wsl -d $distribution --update # Enable GUI support (WSLg)
-	wsl --shutdown # "reboot"
-    }
     wsl -d $distribution -u root /bin/bash -lic "apt update;apt upgrade -y"
     wsl --shutdown # "reboot"
     echo ""
