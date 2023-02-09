@@ -12,7 +12,7 @@
 #                                                                          #
 ############################################################################
 
-# Last update: February 6, 2023
+# Last update: February 9, 2023
 
 #########################
 ###   Configuration   ###
@@ -66,8 +66,8 @@ if ( $winBuild -lt 19041 ) {
 $enableFeatures = $false
 $revertWSLdefault = $false
 # Check (without elevation) if WSL is enabled - Get-WindowsOptionalFeature requires elevation and can stall
-#     If disabled, wsl -h will only show a limited set of options
-if ('' -eq (((wsl -h) -replace "`0" | Select-String --status) -replace " ")) {$enableFeatures=$true}
+#     If disabled, wsl --help will only show a limited set of options
+if ('' -eq (((wsl --help) -replace "`0" | Select-String --status) -replace " ")) {$enableFeatures=$true}
 else { # WSL enabled, check VirtualMachinePlatform (without elevation)
     if ((((wsl --status) -replace "`0" | Select-String "Default Version") -split ": ")[1] -eq 1) {
         # Check if default is 1 to restore later
