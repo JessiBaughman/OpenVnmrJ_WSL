@@ -28,30 +28,6 @@ $ovjWSLfolder="$([Environment]::GetFolderPath('UserProfile'))\Downloads\OpenVnmr
 ###   End Configuration   ###
 #############################
 
-# Define functions to Show/Hide PowerShell console
-Add-Type -Name Window -Namespace Console -MemberDefinition '
-[DllImport("Kernel32.dll")]
-public static extern IntPtr GetConsoleWindow();
-
-[DllImport("user32.dll")]
-public static extern bool ShowWindow(IntPtr hWnd, Int32 nCmdShow);
-'
-function Show-Console ($code)
-{
-    $consolePtr = [Console.Window]::GetConsoleWindow()
-    $consolePtr = [Console.Window]::GetConsoleWindow()
-    [void][Console.Window]::ShowWindow($consolePtr, $code)
-}
-function Hide-Console
-{
-    $consolePtr = [Console.Window]::GetConsoleWindow()
-    [void][Console.Window]::ShowWindow($consolePtr, 0)
-}
-
-echo ""; # Keeps window visible in event Windows prompts about unblocking the script
-
-Hide-Console # Not needed at this point, just the GUI form
-
 # Load for display message boxes and form
 [void][System.Reflection.Assembly]::Load('System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a')
 [void][System.Reflection.Assembly]::Load('System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089')
@@ -90,7 +66,6 @@ if ($enableFeatures) {
         else {Exit 1} # User selected No
     }
     else { # Skip prompt and install features
-        Show-Console(3) # Run maximized to ensure visibility as Windows sometimes opens windows off screen
         echo "Enabling Windows Subsystem for Linux"
         Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux -All -NoRestart -WarningAction SilentlyContinue
         echo "Enabling Virtual Machine Platform"
@@ -945,9 +920,6 @@ function createShorcuts([string]$distribution) {
 }
 
 function installController {
-    # Run maximized to ensure visibility as Windows sometimes opens windows off screen
-    Show-Console(3)
-
     # Create working directory if needed
     if (-not(Test-Path $ovjWSLfolder)) { [void](New-Item $ovjWSLfolder -ItemType Directory) }
 
