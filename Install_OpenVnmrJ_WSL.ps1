@@ -12,7 +12,7 @@
 #                                                                          #
 ############################################################################
 
-# Last update: February 9, 2023
+# Last update: February 10, 2023
 
 #########################
 ###   Configuration   ###
@@ -509,6 +509,25 @@ function installVcXsrv {
         Write-Host "Installing VcXsrv Window X Server........." -nonewline
         Start-Process -Wait -FilePath $vcxsrvinstaller -ArgumentList "/S" # Silent install
         Write-Host "[Done]"; echo ""
+
+        # Allow VcXsrv through Firewall
+        echo "";echo "! Admin needed to allow VcXsrv through Firewall !";echo ""
+        Read-Host -Prompt "       Press [Enter] to grant permission"
+        Start-Process powershell -ArgumentList 'New-NetFirewallRule -DisplayName "VcXsrv" -Direction Inbound -Program "%ProgramFiles%\VcXsrv\vcxsrv.exe" -Action Allow' -Verb runAs
+
+        # Add shortcut to launch VcXsrv with Xauthority to Start Menu
+        $WScriptObj = New-Object -ComObject ("WScript.Shell")
+        $vcxsrvdirectory="$([Environment]::GetFolderPath('ApplicationData'))\Microsoft\Windows\Start Menu\Programs\VcXsrv"
+        if ((Test-Path -Path $vcxsrvdirectory -PathType Container) -eq $false) {
+            New-Item -Path $vcxsrvdirectory -ItemType Directory
+        }
+        $vcxsrvShortcut="$([Environment]::GetFolderPath('ApplicationData'))\Microsoft\Windows\Start Menu\Programs\VcXsrv\VcXSrv with XAuthority.lnk"
+        $shortcutV = $WscriptObj.CreateShortcut($vcxsrvShortcut)
+        $shortcutV.WindowStyle = 7
+        $shortcutV.WorkingDirectory = "$([Environment]::GetFolderPath('UserProfile'))"
+        $shortcutV.TargetPath = '%ProgramFiles%\VcXsrv\vcxsrv.exe'
+        $shortcutV.Arguments = ' -multiwindow -clipboard -wgl -auth "%UserProfile%\.Xauthority"'
+        $shortcutV.Save()
     }
     else {echo "VcXsrv already present. Skipping install."; echo ""}
 }
