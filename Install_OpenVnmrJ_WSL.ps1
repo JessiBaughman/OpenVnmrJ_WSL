@@ -561,7 +561,7 @@ function setupUbuntu([string]$distribution) {
     wsl -d $distribution -u root /bin/bash -c "addgroup nmr"
     Write-Host "Add",$userNameTextBox.Text,"to nmr and sudo group"
     wsl -d $distribution -u root usermod --append --groups nmr,sudo $userNameTextBox.Text
-    $nmrid = (wsl -d Ubuntu -u root grep nmr:x /etc/group).split(':')[2]
+    $nmrid = (wsl -d $distribution -u root grep nmr:x /etc/group).split(':')[2]
     echo ""; Write-Host "Adding vnmr1:nmr user (same password as",$userNameTextBox.Text,")"
     wsl -d $distribution -u root adduser --disabled-login --gecos 'vnmr1' --gid $nmrid vnmr1
     $cmd = -join("echo vnmr1:",$passwordTextBox.Text," | chpasswd")
