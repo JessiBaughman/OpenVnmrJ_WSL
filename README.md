@@ -7,8 +7,8 @@ A Powershell script to install and configure Windows Subsystem for Linux and <a 
 
 ## Prerequisites
 
-### Administer Privledges
-Some parts of the script will require administrator privledges to install, configure, or update. You will be prompted on the secure desktop each time. 
+### Administer Privileges
+Some parts of the script will require administrator privileges to install, configure, or update. You will be prompted on the secure desktop each time. 
 
 ### Windows version
 To find your version of Windows, open the Settings panel (`Windows + I`) and navigate to System->About.
@@ -18,15 +18,15 @@ To find your version of Windows, open the Settings panel (`Windows + I`) and nav
 * **Windows 11** : Version 21H2 (Build 22000, released Fall 2021) or later
 
 ###  BIOS
-You will need to enable virtualization in your system BIOS. Entering the BIOS configuration at boot and the label of the virtualization setting itself varies between motherboard manufactors. You may be able to find detailed instructions by searching your computer model number or manufactor's name.
+You will need to enable virtualization in your system BIOS. Entering the BIOS configuration at boot and the label of the virtualization setting itself varies between motherboard manufacturers. You may be able to find detailed instructions by searching your computer model number or manufacturer's name.
 
 ### Windows Features
 <p align="center">
   <img alt="The Windows Features panel" width="415px" height="368px" src="https://user-images.githubusercontent.com/52927689/218584527-d098fb02-ded6-4171-98bf-a67fd5db776a.png">
 </p>
-Two features need to be installed and activated within Windows. These are the "Virtual Machine Platform" and "Windows Subsystem for Linux" features. You can acess this panel by searching, "Turn Windows features on or off" from the Start Menu. You will need to reboot your computer after enabling these features.
+Two features need to be installed and activated within Windows. These are the "Virtual Machine Platform" and "Windows Subsystem for Linux" features. You can access this panel by searching, "Turn Windows features on or off" from the Start Menu. You will need to reboot your computer after enabling these features.
 
-## Installation / Runnning the script
+## Installation / Running the script
 
 1. **Unlock the script**
    - Right-click on the .ps1 file and click Properties. Check to see if there is a section at the bottom that reads, "Security: This file came from another computer and might be blocked to help protect this computer." If so, click the Unblock checkbox and click OK.
