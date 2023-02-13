@@ -62,7 +62,9 @@ Two features need to be installed and activated within Windows. These are the "V
 </p>
 
 6. **Install OpenVnmrJ**
-    - Select one of the tabs at the top and click Install. For datastations, the selection doesn't matter.
+    - Select one of the tabs at the top. For datastations, the selection doesn't matter.
+    - Select any additional options if desired.
+    -  Click Install. 
     - Note: The dialog may appear slightly off screen. Clicking the window's edge, or resizing the window, will snap it back within the visible desktop space.
     - A second popup will appear with the installation status followed by the OpenVnmrJ Admin panel.
 <p align="center">
