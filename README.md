@@ -8,7 +8,7 @@
   <a href="https://github.com/JessiBaughman/OpenVnmrJ_WSL/issues/new?assignees=&labels=bug&template=01_BUG_REPORT.md&title=bug%3A+">Report a Bug</a>
 </div>
 
-[![license](https://img.shields.io/github/license/JessiBaughman/OpenVnmrJ_WSL)](LICENSE) ![GitHub last commit](https://img.shields.io/github/last-commit/JessiBaughman/OpenVnmrJ_WSL)
+[![license](https://img.shields.io/github/license/JessiBaughman/OpenVnmrJ_WSL.svg)](LICENSE) ![GitHub last commit](https://img.shields.io/github/last-commit/JessiBaughman/OpenVnmrJ_WSL)
 <details open="open">
 <summary>Table of Contents</summary>
 
