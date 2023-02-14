@@ -1,30 +1,58 @@
-<p align="center">
-  <img alt="A splash image for installation script." width="480px" height="182px" src="https://user-images.githubusercontent.com/52927689/218594750-e8f8009f-d60e-4e51-872a-eb274e0709a1.png">
-</p>
+<h1 align="center">
+    <a href="https://github.com/JessiBaughman/OpenVnmrJ_WSL">
+    <img alt="A splash image for installation script." width="640px" height="240px" src="https://user-images.githubusercontent.com/52927689/218879398-e6befea4-01cf-439a-aa2a-3937209f552b.png">
+    </a>
+</h1>
 
-# OpenVnmrJ_WSL
-<a href="https://github.com/OpenVnmrJ/OpenVnmrJ">OpenVnmrJ</a> is free and open-source software for processing NMR spectroscopy data. It runs on Ubuntu 20.04 and Red Hat 7.5+ & 8+ based Linux ditributions as well as macOS 10.13+. This Powershell script is used to install and configure Windows Subsystem for Linux and OpenVnmrJ on Windows 10+ as an alternative to installing within a virtual machine. WSL provides a native application experience and can result in a smaller installation footprint and faster application startup times.
+<div align="center">
+  <a href="https://github.com/JessiBaughman/OpenVnmrJ_WSL/issues/new?assignees=&labels=bug&template=01_BUG_REPORT.md&title=bug%3A+">Report a Bug</a>
+</div>
+
+[![license](https://img.shields.io/github/license/JessiBaughman/OpenVnmrJ_WSL)](LICENSE) ![GitHub last commit](https://img.shields.io/github/last-commit/JessiBaughman/OpenVnmrJ_WSL)
+<details open="open">
+<summary>Table of Contents</summary>
+
+- [About](#about)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+    - [Administer Privileges](#administer-privileges)
+    - [Windows version](#windows-version)
+    - [BIOS](#bios)
+    - [Windows Features](#windows-features)
+  - [Usage / Running the script](#usage--running-the-script)
+- [Running OpenVnmrJ](#running-openvnmrj)
+  - [Launching OpenVnmrJ](#launching-openvnmrj)
+  - [Printing / Plotting](#printing--plotting)
+  - [Closing OpenVnmrJ](#closing-openvnmrj)
+- [License](#license)
+
+</details>
+
+## About
+<a href="https://github.com/OpenVnmrJ/OpenVnmrJ">OpenVnmrJ</a> is free and open-source software for processing NMR spectroscopy data. It runs on Ubuntu 20.04 and Red Hat 7/8 based Linux ditributions as well as macOS 10.13+. This Powershell script is used to install and configure Windows Subsystem for Linux and OpenVnmrJ on Windows 10+ as an alternative to installing within a virtual machine. WSL provides a native application experience and can result in a smaller installation footprint and faster application startup times.
 
 <p>
   <br />
 </p>
 
-## Prerequisites
+## Getting Started
 
-### Administer Privileges
+### Prerequisites
+
+#### Administer Privileges
 Some parts of the script will require administrator privileges to install, configure, or update. You will be prompted on the secure desktop each time. 
 
-### Windows version
+#### Windows version
 To find your version of Windows, open the Settings panel (`Windows + I`) and navigate to System->About.
 
 * **Windows 10** : Version 2004 (aka 20H1, Build 19041, released Spring 2020) or later
   
 * **Windows 11** : Version 21H2 (Build 22000, released Fall 2021) or later
 
-###  BIOS
+####  BIOS
 You will need to enable virtualization in your system BIOS. Entering the BIOS configuration at boot and the label of the virtualization setting itself varies between motherboard manufacturers. You may be able to find detailed instructions by searching your computer model number or manufacturer's name.
 
-### Windows Features
+#### Windows Features
 <p align="center">
   <img alt="The Windows Features panel" width="415px" height="368px" src="https://user-images.githubusercontent.com/52927689/218584527-d098fb02-ded6-4171-98bf-a67fd5db776a.png">
 </p>
@@ -34,7 +62,7 @@ Two features need to be installed and activated within Windows. These are the "V
   <br />
 </p>
 
-## Installation / Running the script
+### Usage / Running the script
 
 1. **Unlock the script**
    - Right-click on the .ps1 file and click Properties. Check to see if there is a section at the bottom that reads, "Security: This file came from another computer and might be blocked to help protect this computer." If so, click the Unblock checkbox and click OK.
@@ -92,3 +120,34 @@ Two features need to be installed and activated within Windows. These are the "V
 10. **Press Enter to close the Powershell window**
      - An installation log is not automatically saved. If you wish to save a log, copy the Powershell contents before pressing Enter.
 
+<p>
+  <br />
+</p>
+
+## Running OpenVnmrJ
+![Running_small](https://user-images.githubusercontent.com/52927689/218871609-11f6ac0e-ff1c-4c80-aa66-1d46d0e87ce6.png)
+### Launching OpenVnmrJ
+* The easiest way to launch OpenVnmrJ is to used the created shortcuts. To launch manually:
+  * Windows 10: Launch VcXsrv using the "VcXsrv with Xauthority" shortcut in the Start Menu or Run: 
+    * `%ProgramFiles%\VcXsrv\vcxsrv.exe -multiwindow -clipboard -wgl -auth "%UserProfile%\.Xauthority"`
+  * Open WSL (Ubuntu-20.04) and type `vnmrj`
+
+### Printing / Plotting
+* Print to file commmands will work as expected. File paths are within Ubuntu, so to save to Windows, navigate to `/mnt/c` to access the `C:` drive. 
+* Output created using the `plot` command will be sent to the PDF printer and saved to the directory selected during install.
+<p align="center">
+  <img alt="Printer selection within the Plot panel of OpenVnmrJ" width="373px" height="248px" src="https://user-images.githubusercontent.com/52927689/218859889-5975e8e9-df79-45da-8329-e5b5aa3340c4.png">
+</p>
+
+* You can toggle between color and grayscale plots by selecting the corresponding version of the PDF printer either from the File->Printers... window or the "Send to" drop-down menu within the Processing->Plot panel.
+
+### Closing OpenVnmrJ
+* OpenVnmrJ can be exited in the standard methods
+  * File->Exit VnmrJ, close the window, or type `exit` on the command line
+* **Windows 10:** Once closed, you will need to manually exit VcXsrv from the taskbar if desired.
+
+## License
+
+This project is licensed under the **MIT license**. Feel free to edit and distribute this template as you like.
+
+See [LICENSE](LICENSE) for more information.
