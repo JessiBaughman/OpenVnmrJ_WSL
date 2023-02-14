@@ -146,6 +146,14 @@ Two features need to be installed and activated within Windows. These are the "V
   * File->Exit VnmrJ, close the window, or type `exit` on the command line
 * **Windows 10:** Once closed, you will need to manually exit VcXsrv from the taskbar if desired.
 
+## Support
+
+- [Report a bug](https://github.com/JessiBaughman/OpenVnmrJ_WSL/issues/new?assignees=&labels=bug&template=01_BUG_REPORT.md&title=bug%3A+) with the script
+
+- For help with OpenVnmrJ
+    - Visit the [OpenVnmrJ GitHub page](https://github.com/OpenVnmrJ/OpenVnmrJ)
+    - Join the [IVAN SpinSights](https://ivanmr.com) NMR support group
+
 ## License
 
 This project is licensed under the **MIT license**. Feel free to edit and distribute this template as you like.
