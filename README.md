@@ -3,7 +3,11 @@
 </p>
 
 # OpenVnmrJ_WSL
-A Powershell script to install and configure Windows Subsystem for Linux and <a href="https://github.com/OpenVnmrJ/OpenVnmrJ">OpenVnmrJ</a> on Windows 10+
+<a href="https://github.com/OpenVnmrJ/OpenVnmrJ">OpenVnmrJ</a> is free and open-source software for processing NMR spectroscopy data. It runs on Ubuntu 20.04 and Red Hat 7.5+ & 8+ based Linux ditributions as well as macOS 10.13+. This Powershell script is used to install and configure Windows Subsystem for Linux and OpenVnmrJ on Windows 10+ as an alternative to installing within a virtual machine. WSL provides a native application experience and can result in a smaller installation footprint and faster application startup times.
+
+<p>
+  <br />
+</p>
 
 ## Prerequisites
 
@@ -25,6 +29,10 @@ You will need to enable virtualization in your system BIOS. Entering the BIOS co
   <img alt="The Windows Features panel" width="415px" height="368px" src="https://user-images.githubusercontent.com/52927689/218584527-d098fb02-ded6-4171-98bf-a67fd5db776a.png">
 </p>
 Two features need to be installed and activated within Windows. These are the "Virtual Machine Platform" and "Windows Subsystem for Linux" features. You can access this panel by searching, "Turn Windows features on or off" from the Start Menu. You will need to reboot your computer after enabling these features.
+
+<p>
+  <br />
+</p>
 
 ## Installation / Running the script
 
