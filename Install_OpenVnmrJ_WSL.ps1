@@ -267,7 +267,7 @@ Windows for easy access. ')
     #
     $passwordTextBox.Location = (New-Object -TypeName System.Drawing.Point -ArgumentList @([System.Int32]168,[System.Int32]70))
     $passwordTextBox.Name = [System.String]'passwordTextBox'
-    $passwordTextBox.PasswordChar = [System.Char]'•'
+    $passwordTextBox.PasswordChar = [System.Char]'*'
     $passwordTextBox.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]275,[System.Int32]26))
     $passwordTextBox.TabIndex = [System.Int32]3
     $toolTip1.SetToolTip($passwordTextBox,[System.String]'Used for both the above account and vnmr1.
