@@ -1,4 +1,4 @@
-############################################################################
+﻿############################################################################
 #      Installs OpenVnmrJ on Ubuntu using Windows Subsystem for Linux      #
 #                                                                          #
 #  To run this script:                                                     #
@@ -12,16 +12,18 @@
 #                                                                          #
 ############################################################################
 
-# Last update: February 10, 2023
+# Last update: September 12, 2024
 
 #########################
 ###   Configuration   ###
 #########################
 
-$defaultWSL = "Ubuntu-20.04" # which WSL distro to use/install by default
+$defaultWSL = "Ubuntu-24.04" # which WSL distro to use/install by default
+$supportedWSL="Ubuntu","Ubuntu-20.04","Ubuntu-22.04","Ubuntu-24.04","AlmaLinux-9","AlmaLinux-8"
 $defaultWSLlink = "https://aka.ms/wslubuntu" # link to default distro (See: https://docs.microsoft.com/en-us/windows/wsl/install-manual)
 $minDist = 20 # minimum int version of Ubuntu supported
-$wslgBuild = 21364 # First build of Windows to incorporte WSLg
+$minRHEL = 8 # minimum int version of Alma/Oracle Linux supported
+$wslgBuild = 19044 # First build of Windows to support WSLg
 $ovjWSLfolder="$([Environment]::GetFolderPath('UserProfile'))\Downloads\OpenVnmrJ_WSL_install" # working directory for downloads
 
 #############################
@@ -32,7 +34,7 @@ $ovjWSLfolder="$([Environment]::GetFolderPath('UserProfile'))\Downloads\OpenVnmr
 [void][System.Reflection.Assembly]::Load('System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a')
 [void][System.Reflection.Assembly]::Load('System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089')
 
-# Determine if on Windows 10 Build 19041 or higher
+# Determine if on Windows 10 Build 19041 or higher for WSL 2 support
 $winBuild = [int](Get-CimInstance -Class Win32_OperatingSystem | Select-Object -ExpandProperty BuildNumber)
 if ( $winBuild -lt 19041 ) {
     [void][System.Windows.Forms.MessageBox]::Show( "This installer is only compatible with `nWindows 10 version 2004 (Build 19041) or higher.`n`nPlease upgrade your system and try again.", "Windows OS Update Required", "Ok", "Hand" )
@@ -229,7 +231,7 @@ function InitializeComponent {
     $groupBox2.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]460,[System.Int32]184))
     $groupBox2.TabIndex = [System.Int32]2
     $groupBox2.TabStop = $false
-    $groupBox2.Text = [System.String]'Ubuntu Configuration'
+    $groupBox2.Text = [System.String]'Linux Configuration'
     #
     #pdfPrinterButton
     #
@@ -272,7 +274,7 @@ Windows for easy access. ')
     $passwordTextBox.TabIndex = [System.Int32]3
     $toolTip1.SetToolTip($passwordTextBox,[System.String]'Used for both the above account and vnmr1.
 
-You will need this for running sudo commands in Ubuntu.
+You will need this for running sudo commands in Linux.
 Root account is passwordless by default.
         
 No length, character, number, etc. requirements')
@@ -284,7 +286,7 @@ No length, character, number, etc. requirements')
     $userNameTextBox.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]275,[System.Int32]26))
     $userNameTextBox.TabIndex = [System.Int32]2
     $userNameTextBox.Text = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name.split('\')[1]
-    $toolTip1.SetToolTip($userNameTextBox,[System.String]'Default user for Ubuntu.
+    $toolTip1.SetToolTip($userNameTextBox,[System.String]'Default user for Linux.
 Can differ from your Windows username.')
     #
     #label2
@@ -294,7 +296,7 @@ Can differ from your Windows username.')
     $label2.Name = [System.String]'label2'
     $label2.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]139,[System.Int32]20))
     $label2.TabIndex = [System.Int32]1
-    $label2.Text = [System.String]'Ubuntu Password:'
+    $label2.Text = [System.String]'Linux Password:'
     #
     #label1
     #
@@ -303,7 +305,7 @@ Can differ from your Windows username.')
     $label1.Name = [System.String]'label1'
     $label1.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]144,[System.Int32]20))
     $label1.TabIndex = [System.Int32]0
-    $label1.Text = [System.String]'Ubuntu Username:'
+    $label1.Text = [System.String]'Linux Username:'
     #
     #desktopCheckBox
     #
@@ -507,24 +509,48 @@ function installVcXsrv {
     else {echo "VcXsrv already present. Skipping install."; echo ""}
 }
 
-# Install and configure Ubuntu in WSL
-function installUbuntu {
-    $wslExe=$(-join(($defaultWSL -replace "-" -replace "\.").ToLower(),".exe"))
-    wsl --install -d $defaultWSL
-    [void](taskkill /IM $wslExe /F)
-    echo "Starting Ubuntu install"
+# Check for winget and install if needed
+function getWinget {
+    # Check if present
+    try {
+        winget --version
+    } catch {
+        $wingetinstaller = "$ovjWSLfolder\winget.msixbundle"
+        dlFile "https://aka.ms/getwinget" "$wingetinstaller"
+        Add-AppxPackage "$wingetinstaller"
+        Add-AppxPackage -Path https://cdn.winget.microsoft.com/cache/source.msix
+    }
+}
+
+# Install and configure Ubuntu or RHEL-based Linux in WSL
+function installUbuntu([string]$distribution) {
+    
+    $wslExe=$(-join(($distribution -replace "-" -replace "\." -replace "_").ToLower(),".exe"))
+    if ((echo $distribution | Select-String Alma)) {
+        $alversion = (($distribution -split "\.")[0] -replace "Alma.*-")
+        getWinget
+        winget install -q "AlmaLinux OS $alversion" -s msstore --accept-package-agreements
+        Start-Process "shell:AppsFolder\$((Get-StartApps "AlmaLinux OS $alversion" | Select-Object -First 1).AppId)"
+        Sleep 1
+        Stop-Process (Get-Process "AlmaLinux$alversion").Id
+    } else {
+        wsl --install -d $distribution --no-launch
+        #[void](taskkill /IM $wslExe /F)
+    }
+    wsl --shutdown
+    echo "Starting WSL install"
     $cmd = -join($wslExe,' install --root')
     Invoke-Expression $cmd # Finish setup and set root as default user (for now)
     echo ""
     # Verify install
-    if (((wsl -d $defaultWSL echo "installed") -replace "`0") -match "no distribution") {
+    if (((wsl -d $distribution echo "installed") -replace "`0") -match "no distribution") {
         [void][System.Windows.Forms.MessageBox]::Show( "Windows Subsystem for Linux failed to install. Verify virtualization is enabled in the BIOS and then rerun this script.", "Pre-Install: Enable Windows Features", "OK", "Hand")
         Exit 1
     }
-    $cmd = -join('adduser --disabled-login --gecos "', $userNameTextBox.Text, '" ', $userNameTextBox.Text)
-    wsl -d $defaultWSL -u root /bin/bash -c $cmd # add user
+    $cmd = -join('useradd --create-home --shell /bin/bash --comment "', $userNameTextBox.Text, '" ', $userNameTextBox.Text)
+    wsl -d $distribution -u root /bin/bash -c $cmd # add user
     $cmd = -join("echo ",$userNameTextBox.Text,":",$passwordTextBox.Text," | chpasswd") # use join due to variable names and : character
-    wsl -d $defaultWSL -u root /bin/bash -c $cmd # set user password
+    wsl -d $distribution -u root /bin/bash -c $cmd # set user password
     Write-Host "Setting",$userNameTextBox.Text,"as default user"
     $cmd = -join($wslExe," config --default-user ",$userNameTextBox.Text)
     Invoke-Expression $cmd # set user as default
@@ -533,21 +559,23 @@ function installUbuntu {
 
 # Configure Ubuntu
 function setupUbuntu([string]$distribution) {
-    wsl -d $distribution -u root /bin/bash -c "addgroup nmr"
-    Write-Host "Add",$userNameTextBox.Text,"to nmr and sudo group"
-    wsl -d $distribution -u root usermod --append --groups nmr,sudo $userNameTextBox.Text
+    if ((echo $distribution | Select-String Ubuntu)) {
+        $pkgMan = "apt"
+        $admin="admin"
+    } else {
+        $pkgMan = "dnf"
+        $admin="wheel"
+    }
+    wsl -d $distribution -u root /bin/bash -c "groupadd nmr"
+    Write-Host "Add",$userNameTextBox.Text,"to nmr and admin group"
+    wsl -d $distribution -u root usermod --append --groups nmr,$admin $userNameTextBox.Text
     $nmrid = (wsl -d $distribution -u root grep nmr:x /etc/group).split(':')[2]
     echo ""; Write-Host "Adding vnmr1:nmr user (same password as",$userNameTextBox.Text,")"
-    wsl -d $distribution -u root adduser --disabled-login --gecos 'vnmr1' --gid $nmrid vnmr1
+    wsl -d $distribution -u root useradd --create-home --shell /bin/bash --comment 'vnmr1' --gid $nmrid vnmr1
     $cmd = -join("echo vnmr1:",$passwordTextBox.Text," | chpasswd")
     wsl -d $distribution -u root /bin/bash -c $cmd # set vnmr1 password
-    wsl -d $distribution -u root usermod --append --groups sudo vnmr1
+    wsl -d $distribution -u root usermod --append --groups $admin vnmr1
     echo ""
-
-    # Update WSL to convert to WSL 2 on Windows 10 and install WSLg support on Windows 11
-    echo "Updating WSL"
-    wsl --update
-    wsl --shutdown
     
     # Convert distribution to WSL 2 if currently WSL 1 (Vnmrbg won't run in WSL 1)
     if ((((wsl -l -v) -replace "`0" | Select-String -SimpleMatch "$distribution ") -replace '.* ') -eq 1) {
@@ -558,30 +586,37 @@ function setupUbuntu([string]$distribution) {
 
 	echo "Configuring $distribution";echo ""
 
+    echo "Disabling SELinux"
+    if ($(wsl -d $distribution -u root --cd /tmp /bin/bash -c "[ -f /etc/selinux/config ] && echo exists || echo")) {
+        wsl -d $distribution -u root /bin/bash -lic "sed -i 's/SELINUX=[eE][nN][fF][oO][rR][cC][iI][nN][gG]/SELINUX=disabled/' /etc/selinux/config; sed -i 's/SELINUX=[pP][eE][rR][mM][iI][sS][sS][iI][vV][eE]/SELINUX=disabled/' /etc/selinux/config"
+    } else {
+        wsl -d $distribution -u root /bin/bash -lic "echo 'SELINUX=disabled' > /etc/selinux/config"
+    }
+    wsl --shutdown # reboot
+    echo ""
+
     echo "Updating $distribution"
-    wsl -d $distribution -u root /bin/bash -lic "apt update;apt upgrade -y"
+    if ((echo $pkgMan | Select-String apt)) {wsl -d $distribution -u root /bin/bash -lic "apt update;apt upgrade -y"}
+    # Add EPEL and create dnf/yum link
+    if ((echo $pkgMan | Select-String dnf)) {
+        wsl -d $distribution -u root /bin/bash -lic "ln -s /bin/dnf /bin/yum"
+        wsl -d $distribution -u root /bin/bash -lic "dnf install -y epel-release"
+        wsl -d $distribution -u root /bin/bash -lic "/usr/bin/crb enable"
+        wsl -d $distribution -u root /bin/bash -lic "dnf upgrade -y"
+    }
+
+    # Enable systemd if needed
+    wsl -d $distribution -u root /bin/bash -lic 'if [ ! -f /etc/wsl.conf ]; then echo "[boot]" > /etc/wsl.conf; echo "systemd=true" >> /etc/wsl.conf; fi; if [ $(grep -c "[boot]" /etc/wsl.conf) -lt 1 ]; then echo "[boot]" >> /etc/wsl.conf; fi; if [ $(grep -c "systemd" /etc/wsl.conf) -gt 0 ]; then sed -i "s/systemd=.*/systemd=true/g" /etc/wsl.conf; else sed -i "/boot/asystemd=true" /etc/wsl.conf; fi '
     wsl --shutdown # "reboot"
     echo ""
     
     echo "Installing cups printer service"
     # Install, start, and enable no-password cups start on boot first. Needed to properly install printer-driver-cups-pdf 
-    wsl -d $distribution -u root /bin/bash -lic "apt install -y cups;service cups start"
-    if ((wsl -d $distribution -u root /bin/bash -lic "grep -c 'nmr.*service cups' /etc/sudoers") -eq 0) { # Don't add if already present
-        wsl -d $distribution -u root sed -i '$ a\%nmr   ALL=(ALL) NOPASSWD: /usr/sbin/service cups \*' /etc/sudoers
-    }
-    if ((wsl -d $distribution -u root /bin/bash -lic "grep -c 'service cups start' ~/.bashrc") -eq 0) {
-        wsl -d $distribution -u root sed -i '$ a\ /usr/sbin/service cups start &> /dev/null' ~/.bashrc
-    }
-    if ((wsl -d $distribution /bin/bash -lic "grep -c 'service cups start' ~/.bashrc") -eq 0) {
-        wsl -d $distribution sed -i '$ a\sudo /usr/sbin/service cups start &> /dev/null' ~/.bashrc
-    }
-    if ((wsl -d $distribution -u vnmr1 /bin/bash -lic "grep -c 'service cups start' ~/.bashrc") -eq 0) {
-        wsl -d $distribution -u vnmr1 sed -i '$ a\sudo /usr/sbin/service cups start &> /dev/null' ~/.bashrc
-    }
+    wsl -d $distribution -u root /bin/bash -lic "$pkgMan install -y cups;/usr/bin/systemctl enable --now cups"
     wsl --shutdown # "reboot"
 
     echo "";echo "Installing PDF viewer, Firefox, htop, unzip, and neofetch"
-    wsl -d $distribution -u root /bin/bash -lic "apt install -y okular firefox htop unzip neofetch;apt autoremove -y"
+    wsl -d $distribution -u root /bin/bash -lic "$pkgMan install -y okular firefox htop unzip neofetch;$pkgMan autoremove -y"
     echo ""
 
     echo "Set Okular as default PDF viewer"
@@ -640,6 +675,10 @@ function setupUbuntu([string]$distribution) {
     wsl -d $distribution -u root --cd ~ sed -i '$ a\set mouse=a \"AddedByOVJInstaller' /root/.vimrc # Enable mouse scrolling
     [void](wsl -d $distribution -u root /bin/bash -c "tail -n 3 /root/.vimrc | tee -a /home/*/.vimrc") # Append vim settings for all users
 
+    # Add script to (un)mount Windows drives in Linux
+    echo "Adding winmount script"
+    wsl -d $distribution -u root /bin/bash -c "curl https://pastebin.com/raw/4pjbQmBN > /usr/bin/winmount;chmod +x /usr/bin/winmount"
+    echo ""
 
     # Setup DISPLAY environment variable and Xauthority settings for Windows 10
     #      - not needed for Windows 11 (and any future Win10 builds with WSLg)
@@ -682,7 +721,8 @@ function setupUbuntu([string]$distribution) {
     wsl --shutdown # "reboot"
 
     echo "Installing PDF printer"
-    wsl -d $distribution -u root /bin/bash -lic "service cups start;apt install -y printer-driver-cups-pdf"
+    if ((echo $pkgMan | Select-String apt)) {$cupspdf="printer-driver-cups-pdf"} else {$cupspdf="cups-pdf"}
+    wsl -d $distribution -u root /bin/bash -lic "systemctl start cups;$pkgMan install -y $cupspdf"
     wsl --shutdown # "reboot"
     echo ""
 }
@@ -698,7 +738,7 @@ function installOVJ([string]$distribution) {
         $ovjInstaller = "$ovjWSLfolder\" + [System.IO.Path]::GetFileName($latestOVJ)
         Write-Host "Downloading",([System.IO.Path]::GetFileName($latestOVJ)),"..." -nonewline # e.g. Downloading OpenVnmrJ_3.1_DDR.zip...
         dlFile "$latestOVJ" "$ovjInstaller"
-        Write-Host "......[Done]" # e.g. Downloading OpenVnmrJ_3.1_DDR.zip.........[Done]
+        Write-Host "......[Done]" # e.g. Downloading OpenVnmrJ_3.2_DDR.zip.........[Done]
         echo ""
     }
     # Extract installer
@@ -747,7 +787,11 @@ function installOVJ([string]$distribution) {
         if ((wsl -d $distribution -u vnmr1 /bin/bash -lic "grep -c 'Name     PDF' /vnmr/devicenames") -eq 0) { # Don't add if already present
             wsl -d $distribution -u vnmr1 sed -i '$ a\################################################' /vnmr/devicenames
             wsl -d $distribution -u vnmr1 sed -i '$ a\Name     PDF' /vnmr/devicenames
-            wsl -d $distribution -u vnmr1 sed -i '$ a\Printer  PDF' /vnmr/devicenames
+            if ((echo $distribution | Select-String Ubuntu)) {
+                wsl -d $distribution -u vnmr1 sed -i '$ a\Printer  PDF' /vnmr/devicenames
+            } else {
+                wsl -d $distribution -u vnmr1 sed -i '$ a\Printer  Cups-PDF' /vnmr/devicenames
+            }
             wsl -d $distribution -u vnmr1 sed -i '$ a\Use      Both' /vnmr/devicenames
             wsl -d $distribution -u vnmr1 sed -i '$ a\Type     PDF_layout' /vnmr/devicenames
             wsl -d $distribution -u vnmr1 sed -i '$ a\Host' /vnmr/devicenames
@@ -756,7 +800,11 @@ function installOVJ([string]$distribution) {
             wsl -d $distribution -u vnmr1 sed -i '$ a\Shared   Yes' /vnmr/devicenames
             wsl -d $distribution -u vnmr1 sed -i '$ a\################################################' /vnmr/devicenames
             wsl -d $distribution -u vnmr1 sed -i '$ a\Name     PDFbw' /vnmr/devicenames
-            wsl -d $distribution -u vnmr1 sed -i '$ a\Printer  PDF' /vnmr/devicenames
+            if ((echo $distribution | Select-String Ubuntu)) {
+                wsl -d $distribution -u vnmr1 sed -i '$ a\Printer  PDF' /vnmr/devicenames
+            } else {
+                wsl -d $distribution -u vnmr1 sed -i '$ a\Printer  Cups-PDF' /vnmr/devicenames
+            }
             wsl -d $distribution -u vnmr1 sed -i '$ a\Use      Both' /vnmr/devicenames
             wsl -d $distribution -u vnmr1 sed -i '$ a\Type     PDFbw_layout' /vnmr/devicenames
             wsl -d $distribution -u vnmr1 sed -i '$ a\Host' /vnmr/devicenames
@@ -765,6 +813,7 @@ function installOVJ([string]$distribution) {
             wsl -d $distribution -u vnmr1 sed -i '$ a\Shared   Yes' /vnmr/devicenames
             wsl -d $distribution -u vnmr1 sed -i '$ a\################################################' /vnmr/devicenames
         }
+
 
         # Add PDF printer configurations to /vnmr/devicetable
         if ((wsl -d $distribution -u vnmr1 /bin/bash -lic "grep -c 'PrinterType         PDF_layout' /vnmr/devicetable") -eq 0) { # Don't add if already present
@@ -824,8 +873,7 @@ function installOVJ([string]$distribution) {
             wsl -d $distribution -u vnmr1 sed -i '$ a\#end of devicetable' /vnmr/devicetable
         }
         echo ""
-    }
-    else {
+    } else {
         echo "ERROR: Expanded dvdimageOVJ directory not found."
         echo "       - Please check installer and try again."
     }
@@ -833,8 +881,11 @@ function installOVJ([string]$distribution) {
     wsl --shutdown
     echo "Finalize PDF printer setup"
     # Something in the OpenVnmrJ installpkgs script breaks the PDF printer. Reinstalling fixes it though.
-    $apt=$(wsl -d $distribution -u root /bin/bash -c "which apt") # use actual apt for reinstall command in event apt is aliased (e.g. nala install)
-    wsl -d $distribution -u root /bin/bash -lic "service cups start;$apt reinstall -y printer-driver-cups-pdf"
+    if ((echo $pkgMan | Select-String apt)) {
+        wsl -d $distribution -u root /bin/bash -lic "systemctl enable --now cups;/usr/bin/apt reinstall -y printer-driver-cups-pdf"
+    } else {
+        wsl -d $distribution -u root /bin/bash -lic "systemctl enable --now cups;/usr/bin/dnf reinstall -y cups-pdf"
+    }
     echo ""
 }
 
@@ -875,7 +926,7 @@ function createShorcuts([string]$distribution) {
         $shortcutAdminS.WindowStyle = 7
         $shortcutAdminS.WorkingDirectory = "$([Environment]::GetFolderPath('UserProfile'))"
 
-        if ($winBuild -lt $wslgBuild) { # Windows 10
+        if ($winBuild -lt $wslgBuild) { # non-WSLg Windows 10
             # Build batch file to launch VcXsrv if needed and then launch OpenVnmrJ
             $batFile="$iconDir\vnmrj.bat"
             'tasklist /fi "IMAGENAME eq VcXsrv.exe" /fo csv 2>NUL | find /I "vcxsrv.exe">NUL' | Out-File -FilePath $batFile -Encoding ascii
@@ -892,7 +943,7 @@ function createShorcuts([string]$distribution) {
             $shortcutS.TargetPath = $batFile
             $shortcutAdminS.TargetPath = $batFileAdmin
         }
-        else { # Windows 11 - launch OpenVnmrJ directly
+        else { # WSLg-based Windows 10/11 - launch OpenVnmrJ directly
             $shortcutD.TargetPath = 'C:\WINDOWS\system32\wsl.exe'
 	    $shortcutD.Arguments = '-d '+$distribution+' /bin/bash -lic "vnmrj; sleep 3"'
             $shortcutAdminD.TargetPath = 'C:\WINDOWS\system32\wsl.exe'
@@ -926,52 +977,79 @@ function installController {
     # Install X server for Windows 10
     if ( $winBuild -lt $wslgBuild ) {installVcXsrv}
 
-    # Determine if Ubuntu is already installed
+    # Update WSL to convert to WSL 2 on Windows 10 and install WSLg where supported
+    echo "Updating WSL"
+    wsl --update
+    wsl --shutdown
+
+    # Determine if Ubuntu or Alma/Oracle Linux is already installed
     $instU = 1 # Install flag
     $ubuntus = @((wsl -l) -replace "`0" | Select-String Ubuntu) # -replace "`0" due to wsl UTF-16LE-encoded output
-    if ( $ubuntus ) { # 1+ Ubuntu distributions already installed
+    $rhels = @((wsl -l) -replace "`0" | Select-String -Pattern "(Alma|Oracle)") # -replace "`0" due to wsl UTF-16LE-encoded output
+    if ( $ubuntus -Or $rhels ) { # 1+ Ubuntu/Alma/Oracle distributions already installed
         $step = 0
-        $validUbuntus = @()
-        foreach ($dist in $ubuntus) { # Remove older, unsupported versions from list
+        $validDistros = @()
+        foreach ($dist in $ubuntus) { # Remove older, unsupported Ubuntu versions from list
             if ( $dist -match "-" ) { 
                 if ((($dist -split "\.")[0] -replace "Ubuntu-") -ge $minDist) {
-                    $validUbuntus += $dist
+                    $validDistros += $dist
                 }
             }
-            else {$validUbuntus += $dist } # Plain Ubuntu (no version label) case
+            else {$validDistros += $dist } # Plain Ubuntu (no version label) case
         }
-        if ($validUbuntus) {
-            if (-not(echo $validUbuntus | Select-String "^$defaultWSL$") -And -not(echo $validUbuntus | Select-String "^$defaultWSL \(Default\)$")) { $validUbuntus += "$defaultWSL (Install)"}
-            echo "Ubuntu already installed."
-            echo "-----------------------------"
-            $step = 0
-            foreach ($dist in $validUbuntus) {
-                echo "[$step] $dist"
+        foreach ($dist in $rhels) { # Remove older, unsupported Alma versions from list
+            if ( $dist -match "-" -Or $dist -match "_") { 
+                if (((($dist -replace "Alma.*-") -replace "Oracle.*x_") -replace "_.*") -ge $minRHEL) {
+                    $validDistros += $dist
+                }
+            }
+        }
+        $step = 0
+        echo ""
+        echo "╔═════════════════════════════════════════╗"
+        echo "║ Select a supported distro for OpenVnmrJ ║"
+        echo "╚═════════════════════════════════════════╝"
+        echo ""
+        if ($validDistros) {
+            echo "  Distros already present on this system"
+            echo "-------------------------------------------"
+            foreach ($dist in $validDistros) {
+                echo "   [$step] $dist"
+                $validDistros[$step] = $($dist -replace '\(.*').Trim()
                 $step++
             }
-            echo "-----------------------------"
-            do { # Verify number input
-                $whichUbuntu = Read-Host -Prompt "Select distribution to use (Note: Only version 20.04 is supported)"
-                $value = $whichUbuntu -as [Int]
-                $ok = $value -ne $NULL
-                if (-not $ok) {Write-Host "Enter digit only"}
-            } until ($ok)
-            if (-not(echo $validUbuntus[$whichUbuntu] | Select-String Install)) {$instU = 0} # Use installed distribution
-            if ((echo $validUbuntus[$whichUbuntu] | Select-String Default)) {$validUbuntus[$whichUbuntu] = $validUbuntus[0] -replace ' \(.*'} # Delete (Default) if present
+            echo ""
+            echo "     Or install a new supported distro"
+        } else {
+            echo "        Install a supported distro"
+        }
+
+        echo "-------------------------------------------"
+        $notInstalled = $supportedWSL| ? {$_ -notin $validDistros}
+        foreach ($dist in $notInstalled) {
+            echo "   [$step] $dist"
+            $step++
+        }
+        echo ""
+        do { # Verify number input
+            $whichDistro = Read-Host -Prompt "  Select distribution to use"
+            if ($whichDistro -eq '') {$whichDistro = $step + 1}
+            $value = $whichDistro -as [Int]
+            $ok = $(($value -ne $NULL) -And ($value -lt $step))
+            if (-not $ok) {Write-Host ""; Write-Host "! Enter digit less than $step only"}
+        } until ($ok)
+        if ($whichDistro -ge $validDistros.Length) {
+            $installDist = $notInstalled[$whichDistro-$validDistros.Length]
+        } else {
+            $instU = 0 # Use an installed distribution
+            $installDist = $validDistros[$whichDistro]
         }
     }
 
-    if ($instU) {  # No Ubuntu or install option selected
-        installUbuntu
-        setupUbuntu($defaultWSL) 
-        installOVJ($defaultWSL)
-        createShorcuts($defaultWSL)
-    }
-    else {  # Install not selected, skip install
-        setupUbuntu($validUbuntus[$whichUbuntu])
-        installOVJ($validUbuntus[$whichUbuntu])
-        createShorcuts($validUbuntus[$whichUbuntu])
-    }
+    if ($instU) { installUbuntu($installDist) }
+    setupUbuntu($installDist)
+    installOVJ($installDist)
+    createShorcuts($installDist)
     # Restore wsl default version, if was 1 before running this script
     if ($revertWSLdefault) {
         echo "Restoring default WSL install version to 1"
