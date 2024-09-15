@@ -19,6 +19,7 @@
 - [Running OpenVnmrJ](#running-openvnmrj)
   - [Launching OpenVnmrJ](#launching-openvnmrj)
   - [Printing / Plotting](#printing--plotting)
+  - [Default PDF Reader](#default-pdf-reader)
   - [Closing OpenVnmrJ](#closing-openvnmrj)
   - [Updating OpenVnmrJ](#updating-openvnmrj)
 - [License](#license)
@@ -87,7 +88,7 @@ Two features need to be installed and activated within Windows. These are the "V
     - The first step will install the <a href="https://sourceforge.net/projects/vcxsrv/">VcXsrv display server</a> if not already present on your system. 
     - This will require elevated privileges first for the install, which will prompt immediately following installer download
     - After installation, you will be notified of an additional elevated prompt request to create a firewall rule for VcXsrv
-5. Main installation
+5. **Main installation**
     - The script will proceed unattended until the OpenVnmrJ graphical installer runs, as pictured below.
 <p align="center""><img alt="The initial OpenVnmrJ installation dialog panel" src="images/OpenVnmrJ_WSL_install_01.png" width="406px" height="383px"></p>
 <p align="center""><img alt="The OpenVnmrJ installation dialog panel after clicking the DDR2 tab" src="images/OpenVnmrJ_WSL_install_02.png" width="406px" height="383px"></p>
