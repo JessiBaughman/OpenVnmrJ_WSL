@@ -1,4 +1,4 @@
-[![A splash image for installation script](images/OpenVnmrJ_WSL_header.png)](https://github.com/JessiBaughman/OpenVnmrJ_WSL){width="640px" height="240px" style="margin:0 auto;display:block;"}
+<p align="center"><a href="https://github.com/JessiBaughman/OpenVnmrJ_WSL"><img width="640px" height="240px" style="margin:0 auto;display:block;" alt="A splash image for installation script" src="images/OpenVnmrJ_WSL_header.png"></a></p>
 
 <div align="center">
   <a href="https://github.com/JessiBaughman/OpenVnmrJ_WSL/issues/new?assignees=&labels=bug&template=01_BUG_REPORT.md&title=bug%3A+">Report a Bug</a>
@@ -52,7 +52,7 @@ To find your version of Windows, open the Settings panel (`Windows + I`) and nav
 You will need to enable virtualization in your system BIOS. Entering the BIOS configuration at boot and the label of the virtualization setting itself varies between motherboard manufacturers. You may be able to find detailed instructions by searching your computer model number or manufacturer's name.
 
 #### Windows Features
-![The Windows Features panel](images/OpenVnmrJ_WSL_Windows_Features.png){width="415px" height="368px" style="margin:0 auto;display:block;"}
+<p align="center""><img alt="The Windows Features panel" src="images/OpenVnmrJ_WSL_Windows_Features.png" width="415px" height="368px"></p>
 Two features need to be installed and activated within Windows. These are the "Virtual Machine Platform" and "Windows Subsystem for Linux" features. You can access this panel by searching, "Turn Windows features on or off" from the Start Menu. You will need to reboot your computer after enabling these features.
 
 <p>
@@ -73,7 +73,7 @@ Two features need to be installed and activated within Windows. These are the "V
           - Open PowerShell and enter: `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`
           - Enter `y` at the prompt.
           - Rerun the script.
-![The initial installation dialog panel](images/OpenVnmrJ_WSL_GUI.png){width="324px" height="482px" style="margin:0 auto;display:block;"}
+<p align="center""><img alt="The initial installation dialog panel" src="images/OpenVnmrJ_WSL_GUI.png" width="324px" height="482px"></p>
 
 3. **Fill out the form and click Install**
     - Install from file supports .zip, .tar, and .tar.gz archive files. Archives should decompress to a directory named dvdimageOVJ.
@@ -88,8 +88,8 @@ Two features need to be installed and activated within Windows. These are the "V
     - After installation, you will be notified of an additional elevated prompt request to create a firewall rule for VcXsrv
 5. Main installation
     - The script will proceed unattended until the OpenVnmrJ graphical installer runs, as pictured below.
-![The initial OpenVnmrJ installation dialog panel](images/OpenVnmrJ_WSL_install_01.png){width="406px" height="383px" style="margin:0 auto;display:block;"}
-![The OpenVnmrJ installation dialog panel after clicking the DDR2 tab](images/OpenVnmrJ_WSL_install_02.png){width="406px" height="383px" style="margin:0 auto;display:block;"}
+<p align="center""><img alt="The initial OpenVnmrJ installation dialog panel" src="images/OpenVnmrJ_WSL_install_01.png" width="406px" height="383px"></p>
+<p align="center""><img alt="The OpenVnmrJ installation dialog panel after clicking the DDR2 tab" src="images/OpenVnmrJ_WSL_install_02.png" width="406px" height="383px"></p>
 
 
 6. **Install OpenVnmrJ**
@@ -98,12 +98,12 @@ Two features need to be installed and activated within Windows. These are the "V
     -  Click Install. 
     - Note: The dialog may appear slightly off screen. Clicking the window's edge, or resizing the window, will snap it back within the visible desktop space.
     - A second popup will appear with the installation status followed by the OpenVnmrJ Admin panel.
-![The OpenVnmrJ Admin panel](images/OpenVnmrJ_WSL_install_03.png){width="586px" height="395px" style="margin:0 auto;display:block;"}
+<p align="center""><img alt="The OpenVnmrJ Admin panel" src="images/OpenVnmrJ_WSL_install_03.png" width="586px" height="395px"></p>
 
 7. **Close the OpenVnmrJ Admin window**
     - You do not need to follow the instructions. Just close the window and everything will be setup automatically later in the script.
 
-![The completed OpenVnmrJ installation status panel](images/OpenVnmrJ_WSL_install_04.png){width="491px" height="425px" style="margin:0 auto;display:block;"}
+<p align="center""><img alt="The completed OpenVnmrJ installation status panel" src="images/OpenVnmrJ_WSL_install_04.png" width="491px" height="425px"></p>
 
 8. **Click Done**
 9. **Answer the 5 prompts within the PowerShell window**
@@ -117,7 +117,7 @@ Two features need to be installed and activated within Windows. These are the "V
 </p>
 
 ## Running OpenVnmrJ
-![OpenVnmrJ application running on Windows 11 via WSL](images/OpenVnmrJ_WSL_Running.png){style="margin:0 auto;display:block;"}
+<p align="center""><img alt="OpenVnmrJ application running on Windows 11 via WSL" src="images/OpenVnmrJ_WSL_Running.png"></p>
 ### Launching OpenVnmrJ
 * The easiest way to launch OpenVnmrJ is to used the created shortcuts. To launch manually:
   * Windows 10 (20H1-21H2): Launch VcXsrv using the "VcXsrv with Xauthority" shortcut in the Start Menu or Run: 
@@ -129,7 +129,7 @@ Two features need to be installed and activated within Windows. These are the "V
 	- If you need to mount other Windows drives within Linux, the `winmount` script [[source](https://pastebin.com/4pjbQmBN)] has been included. Run `winmount x`, where x is the Windows drive letter you wish to mount or unmount. Drives will appear in `/mnt`.
 * Output created using the `plot` command will be sent to the PDF printer and saved to the directory selected during install.
 
-![Printer selection within the Plot panel of OpenVnmrJ](images/OpenVnmrJ_WSL_Plotting.png){width="373px" height="248px" style="margin:0 auto;display:block;"}
+<p align="center""><img alt="Printer selection within the Plot panel of OpenVnmrJ" src="images/OpenVnmrJ_WSL_Plotting.png" width="373px" height="248px"></p>
 
 * You can toggle between color and grayscale plots by selecting the corresponding version of the PDF printer either from the File->Printers... window or the "Send to" drop-down menu within the Processing->Plot panel.
 
