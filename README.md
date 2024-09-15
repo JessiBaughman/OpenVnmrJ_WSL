@@ -20,6 +20,7 @@
   - [Launching OpenVnmrJ](#launching-openvnmrj)
   - [Printing / Plotting](#printing--plotting)
   - [Closing OpenVnmrJ](#closing-openvnmrj)
+  - [Updating OpenVnmrJ](#updating-openvnmrj)
 - [License](#license)
 
 </details>
@@ -118,6 +119,7 @@ Two features need to be installed and activated within Windows. These are the "V
 
 ## Running OpenVnmrJ
 <p align="center""><img alt="OpenVnmrJ application running on Windows 11 via WSL" src="images/OpenVnmrJ_WSL_Running.png"></p>
+
 ### Launching OpenVnmrJ
 * The easiest way to launch OpenVnmrJ is to used the created shortcuts. To launch manually:
   * Windows 10 (20H1-21H2): Launch VcXsrv using the "VcXsrv with Xauthority" shortcut in the Start Menu or Run: 
@@ -146,7 +148,7 @@ Two features need to be installed and activated within Windows. These are the "V
 	* Open from the distro shortcut in the Start Menu
 	* _OR_ run `wsl -d <distro_name> -u vnmr1` from the Command Prompt or PowerShell
 * If needed, `su vnmr1`. If you used this script, the vnmr1 password was set to the same as the default WSL account. Use the PowerShell command in the previous step if you have forgotten your vnmr1 password.
-* Copy the OpenVnmrJ\*.zip or OVJdvd\*.tar.gz archive to `/tmp/`, `cd` to `/tmp/`, and then expand the file with `unzip` or `tar -xzvf`. 
+* Copy the OpenVnmrJ\*.zip or OVJdvd\*.tar.gz archive of the new OpenVnmrJ release/build to `/tmp/`, `cd` to `/tmp/`, and then expand the file with `unzip` or `tar -xzvf`. 
 * Run `cd dvdimageOVJ` followed by `./upgrade.nmr`. 
 	* All replaced OpenVnmrJ system files will be located in `/vnmr/adm/upgrade/<current_date>`
 
