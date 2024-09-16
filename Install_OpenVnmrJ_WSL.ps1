@@ -1,18 +1,18 @@
-﻿############################################################################
-#      Installs OpenVnmrJ on Ubuntu using Windows Subsystem for Linux      #
-#                                                                          #
-#  To run this script:                                                     #
-#                                                                          #
-#      * Right-click on this file and select Properties                    #
-#          * Check the Unblock box at the bottom if present and click OK   #
-#                                                                          #
-#      * Right-click on this file and select Run with PowerShell           #
-#                                                                          #
-#   Troubleshooting see: https://github.com/JessiBaughman/OpenVnmrJ_WSL    #
-#                                                                          #
-############################################################################
+﻿##############################################################################
+#   Installs OpenVnmrJ on Ubuntu or Alma using Windows Subsystem for Linux   #
+#                                                                            #
+#  To run this script:                                                       #
+#                                                                            #
+#      * Right-click on this file and select Properties                      #
+#          * Check the Unblock box at the bottom if present and click OK     #
+#                                                                            #
+#      * Right-click on this file and select Run with PowerShell             #
+#                                                                            #
+#   Troubleshooting see: https://github.com/JessiBaughman/OpenVnmrJ_WSL      #
+#                                                                            #
+##############################################################################
 
-# Last update: September 12, 2024
+# Last update: September 15, 2024
 
 #########################
 ###   Configuration   ###
@@ -22,7 +22,7 @@ $defaultWSL = "Ubuntu-24.04" # which WSL distro to use/install by default
 $supportedWSL="Ubuntu","Ubuntu-20.04","Ubuntu-22.04","Ubuntu-24.04","AlmaLinux-9","AlmaLinux-8"
 $defaultWSLlink = "https://aka.ms/wslubuntu" # link to default distro (See: https://docs.microsoft.com/en-us/windows/wsl/install-manual)
 $minDist = 20 # minimum int version of Ubuntu supported
-$minRHEL = 8 # minimum int version of Alma/Oracle Linux supported
+$minAlma = 8 # minimum int version of Alma Linux supported
 $wslgBuild = 19044 # First build of Windows to support WSLg
 $ovjWSLfolder="$([Environment]::GetFolderPath('UserProfile'))\Downloads\OpenVnmrJ_WSL_install" # working directory for downloads
 
@@ -522,7 +522,7 @@ function getWinget {
     }
 }
 
-# Install and configure Ubuntu or RHEL-based Linux in WSL
+# Install and configure Ubuntu or Alma-based Linux in WSL
 function installUbuntu([string]$distribution) {
     
     $wslExe=$(-join(($distribution -replace "-" -replace "\." -replace "_").ToLower(),".exe"))
@@ -618,7 +618,7 @@ function setupUbuntu([string]$distribution) {
     echo "";echo "Installing PDF viewer, Firefox, htop, unzip, and neofetch"
     wsl -d $distribution -u root /bin/bash -lic "$pkgMan install -y okular firefox htop unzip neofetch;$pkgMan autoremove -y"
     echo ""
-
+    
     echo "Set Okular as default PDF viewer"
     # Default user
     wsl -d $distribution --cd ~ /bin/bash -c "[ -d .config ] && echo || mkdir .config"
@@ -722,8 +722,18 @@ function setupUbuntu([string]$distribution) {
 
     echo "Installing PDF printer"
     if ((echo $pkgMan | Select-String apt)) {$cupspdf="printer-driver-cups-pdf"} else {$cupspdf="cups-pdf"}
-    wsl -d $distribution -u root /bin/bash -lic "systemctl start cups;$pkgMan install -y $cupspdf"
-    wsl --shutdown # "reboot"
+    wsl -d $distribution -u root /bin/bash -lic "systemctl enable --now cups;$pkgMan install -y $cupspdf"
+    wsl --shutdown
+    wsl -d $distribution /bin/bash -lic "echo ' '"
+    wsl -d $distribution -u root sed -i 's/^Out.*/Out \$\{HOME\}\/PDF/' /etc/cups/cups-pdf.conf
+    if ((echo $pkgMan | Select-String apt)) {
+        wsl -d $distribution -u root /bin/bash -lic "lpadmin -p cups-pdf -v cups-pdf:/ -E -P /usr/share/ppd/cups-pdf/CUPS-PDF_opt.ppd"
+    } else {
+        wsl -d $distribution -u root /bin/bash -lic "lpadmin -p cups-pdf -v cups-pdf:/ -E -P /usr/share/cups/model/CUPS-PDF_opt.ppd"
+    }
+    wsl -d $distribution -u root /bin/bash -lic "cupsaccept cups-pdf;cupsenable cups-pdf"
+    # Need to enable/disable/enable with delays to get /etc/cups/printers.conf to be written from outside a WSL window
+    wsl -d $distribution -u root /bin/bash -lic "sleep 10;cupsdisable cups-pdf;cupsenable cups-pdf;sleep 10"
     echo ""
 }
 
@@ -787,11 +797,7 @@ function installOVJ([string]$distribution) {
         if ((wsl -d $distribution -u vnmr1 /bin/bash -lic "grep -c 'Name     PDF' /vnmr/devicenames") -eq 0) { # Don't add if already present
             wsl -d $distribution -u vnmr1 sed -i '$ a\################################################' /vnmr/devicenames
             wsl -d $distribution -u vnmr1 sed -i '$ a\Name     PDF' /vnmr/devicenames
-            if ((echo $distribution | Select-String Ubuntu)) {
-                wsl -d $distribution -u vnmr1 sed -i '$ a\Printer  PDF' /vnmr/devicenames
-            } else {
-                wsl -d $distribution -u vnmr1 sed -i '$ a\Printer  Cups-PDF' /vnmr/devicenames
-            }
+            wsl -d $distribution -u vnmr1 sed -i '$ a\Printer  cups-pdf' /vnmr/devicenames
             wsl -d $distribution -u vnmr1 sed -i '$ a\Use      Both' /vnmr/devicenames
             wsl -d $distribution -u vnmr1 sed -i '$ a\Type     PDF_layout' /vnmr/devicenames
             wsl -d $distribution -u vnmr1 sed -i '$ a\Host' /vnmr/devicenames
@@ -800,11 +806,7 @@ function installOVJ([string]$distribution) {
             wsl -d $distribution -u vnmr1 sed -i '$ a\Shared   Yes' /vnmr/devicenames
             wsl -d $distribution -u vnmr1 sed -i '$ a\################################################' /vnmr/devicenames
             wsl -d $distribution -u vnmr1 sed -i '$ a\Name     PDFbw' /vnmr/devicenames
-            if ((echo $distribution | Select-String Ubuntu)) {
-                wsl -d $distribution -u vnmr1 sed -i '$ a\Printer  PDF' /vnmr/devicenames
-            } else {
-                wsl -d $distribution -u vnmr1 sed -i '$ a\Printer  Cups-PDF' /vnmr/devicenames
-            }
+            wsl -d $distribution -u vnmr1 sed -i '$ a\Printer  cups-pdf' /vnmr/devicenames
             wsl -d $distribution -u vnmr1 sed -i '$ a\Use      Both' /vnmr/devicenames
             wsl -d $distribution -u vnmr1 sed -i '$ a\Type     PDFbw_layout' /vnmr/devicenames
             wsl -d $distribution -u vnmr1 sed -i '$ a\Host' /vnmr/devicenames
@@ -877,16 +879,6 @@ function installOVJ([string]$distribution) {
         echo "ERROR: Expanded dvdimageOVJ directory not found."
         echo "       - Please check installer and try again."
     }
-
-    wsl --shutdown
-    echo "Finalize PDF printer setup"
-    # Something in the OpenVnmrJ installpkgs script breaks the PDF printer. Reinstalling fixes it though.
-    if ((echo $pkgMan | Select-String apt)) {
-        wsl -d $distribution -u root /bin/bash -lic "systemctl enable --now cups;/usr/bin/apt reinstall -y printer-driver-cups-pdf"
-    } else {
-        wsl -d $distribution -u root /bin/bash -lic "systemctl enable --now cups;/usr/bin/dnf reinstall -y cups-pdf"
-    }
-    echo ""
 }
 
 # Create Shortcuts
@@ -982,11 +974,11 @@ function installController {
     wsl --update
     wsl --shutdown
 
-    # Determine if Ubuntu or Alma/Oracle Linux is already installed
+    # Determine if Ubuntu or Alma Linux is already installed
     $instU = 1 # Install flag
     $ubuntus = @((wsl -l) -replace "`0" | Select-String Ubuntu) # -replace "`0" due to wsl UTF-16LE-encoded output
-    $rhels = @((wsl -l) -replace "`0" | Select-String -Pattern "(Alma|Oracle)") # -replace "`0" due to wsl UTF-16LE-encoded output
-    if ( $ubuntus -Or $rhels ) { # 1+ Ubuntu/Alma/Oracle distributions already installed
+    $almas = @((wsl -l) -replace "`0" | Select-String -Pattern "(Alma)") # -replace "`0" due to wsl UTF-16LE-encoded output
+    if ( $ubuntus -Or $almas ) { # 1+ Ubuntu/Alma/Oracle distributions already installed
         $step = 0
         $validDistros = @()
         foreach ($dist in $ubuntus) { # Remove older, unsupported Ubuntu versions from list
@@ -997,9 +989,9 @@ function installController {
             }
             else {$validDistros += $dist } # Plain Ubuntu (no version label) case
         }
-        foreach ($dist in $rhels) { # Remove older, unsupported Alma versions from list
-            if ( $dist -match "-" -Or $dist -match "_") { 
-                if (((($dist -replace "Alma.*-") -replace "Oracle.*x_") -replace "_.*") -ge $minRHEL) {
+        foreach ($dist in $almas) { # Remove older, unsupported Alma versions from list
+            if ( $dist -match "-") { 
+                if (($dist -replace "Alma.*-") -ge $minAlma) {
                     $validDistros += $dist
                 }
             }
