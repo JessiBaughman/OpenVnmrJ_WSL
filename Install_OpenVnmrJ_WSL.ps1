@@ -12,7 +12,7 @@
 #                                                                            #
 ##############################################################################
 
-# Last update: September 15, 2024
+# Last update: September 16, 2024
 
 #########################
 ###   Configuration   ###
@@ -777,7 +777,7 @@ function installOVJ([string]$distribution) {
         }
 
         # Start the installer - User will need to complete interactively, including shell prompts
-        wsl -d $distribution -u root --cd '/tmp/dvdimageOVJ' /bin/bash -lic ./load.nmr
+        wsl -d $distribution -u root --cd '/tmp/dvdimageOVJ' /bin/bash -lic "touch LocatorOff && ./load.nmr"
         wsl --shutdown # reboot
 
        
@@ -978,65 +978,65 @@ function installController {
     $instU = 1 # Install flag
     $ubuntus = @((wsl -l) -replace "`0" | Select-String Ubuntu) # -replace "`0" due to wsl UTF-16LE-encoded output
     $almas = @((wsl -l) -replace "`0" | Select-String -Pattern "(Alma)") # -replace "`0" due to wsl UTF-16LE-encoded output
-    if ( $ubuntus -Or $almas ) { # 1+ Ubuntu/Alma/Oracle distributions already installed
-        $step = 0
-        $validDistros = @()
-        foreach ($dist in $ubuntus) { # Remove older, unsupported Ubuntu versions from list
-            if ( $dist -match "-" ) { 
-                if ((($dist -split "\.")[0] -replace "Ubuntu-") -ge $minDist) {
-                    $validDistros += $dist
-                }
+    $step = 0
+    $validDistros = @()
+    foreach ($dist in $ubuntus) { # Remove older, unsupported Ubuntu versions from list
+        if ( $dist -match "-" ) { 
+            if ((($dist -split "\.")[0] -replace "Ubuntu-") -ge $minDist) {
+                $validDistros += $dist
             }
-            else {$validDistros += $dist } # Plain Ubuntu (no version label) case
-        }
-        foreach ($dist in $almas) { # Remove older, unsupported Alma versions from list
-            if ( $dist -match "-") { 
-                if (($dist -replace "Alma.*-") -ge $minAlma) {
-                    $validDistros += $dist
-                }
+        } else {$validDistros += $dist } # Plain Ubuntu (no version label) case
+    }
+    foreach ($dist in $almas) { # Remove older, unsupported Alma versions from list
+        if ( $dist -match "-") { 
+            if (($dist -replace "Alma.*-") -ge $minAlma) {
+                $validDistros += $dist
             }
         }
-        $step = 0
-        echo ""
-        echo "╔═════════════════════════════════════════╗"
-        echo "║ Select a supported distro for OpenVnmrJ ║"
-        echo "╚═════════════════════════════════════════╝"
-        echo ""
-        if ($validDistros) {
-            echo "  Distros already present on this system"
-            echo "-------------------------------------------"
-            foreach ($dist in $validDistros) {
-                echo "   [$step] $dist"
-                $validDistros[$step] = $($dist -replace '\(.*').Trim()
-                $step++
-            }
-            echo ""
-            echo "     Or install a new supported distro"
-        } else {
-            echo "        Install a supported distro"
-        }
-
+    }
+    $step = 0
+    echo ""
+    echo "╔═════════════════════════════════════════╗"
+    echo "║ Select a supported distro for OpenVnmrJ ║"
+    echo "╚═════════════════════════════════════════╝"
+    echo ""
+    if ($validDistros) {
+        echo "  Distros already present on this system"
         echo "-------------------------------------------"
-        $notInstalled = $supportedWSL| ? {$_ -notin $validDistros}
-        foreach ($dist in $notInstalled) {
+        foreach ($dist in $validDistros) {
             echo "   [$step] $dist"
+            $validDistros[$step] = $($dist -replace '\(.*').Trim()
             $step++
         }
         echo ""
-        do { # Verify number input
-            $whichDistro = Read-Host -Prompt "  Select distribution to use"
-            if ($whichDistro -eq '') {$whichDistro = $step + 1}
-            $value = $whichDistro -as [Int]
-            $ok = $(($value -ne $NULL) -And ($value -lt $step))
-            if (-not $ok) {Write-Host ""; Write-Host "! Enter digit less than $step only"}
-        } until ($ok)
-        if ($whichDistro -ge $validDistros.Length) {
-            $installDist = $notInstalled[$whichDistro-$validDistros.Length]
-        } else {
-            $instU = 0 # Use an installed distribution
-            $installDist = $validDistros[$whichDistro]
-        }
+        echo "     Or install a new supported distro"
+    } else {
+        echo "        Install a supported distro"
     }
+
+    echo "-------------------------------------------"
+    $notInstalled = $supportedWSL| ? {$_ -notin $validDistros}
+    foreach ($dist in $notInstalled) {
+        echo "   [$step] $dist"
+        $step++
+    }
+    echo ""
+    do { # Verify number input
+        $whichDistro = Read-Host -Prompt "  Select distribution to use"
+        if ($whichDistro -eq '') {$whichDistro = $step + 1}
+        $value = $whichDistro -as [Int]
+        $ok = $(($value -ne $NULL) -And ($value -lt $step))
+        if (-not $ok) {Write-Host ""; Write-Host "! Enter digit less than $step only"}
+    } until ($ok)
+    if ($whichDistro -ge $validDistros.Length) {
+        $installDist = $notInstalled[$whichDistro-$validDistros.Length]
+    } else {
+        $instU = 0 # Use an installed distribution
+        $installDist = $validDistros[$whichDistro]
+    }
+
+    echo ""
+    $setDefault = Read-Host -Prompt "  Do you want to make $installDist the default WSL distribution [y/N]?"
 
     if ($instU) { installUbuntu($installDist) }
     setupUbuntu($installDist)
@@ -1046,6 +1046,10 @@ function installController {
     if ($revertWSLdefault) {
         echo "Restoring default WSL install version to 1"
         wsl --set-default-version 1
+    }
+    if ($setDefault -ieq "y" -Or $setDefault -ieq "yes" ) {
+        echo "";echo "Setting $installDist as the default WSL distribution"
+        wsl -s $installDist
     }
     echo "";echo "***  Installation Complete!  ***";echo ""
     Read-Host -Prompt "Press [Enter] to close this window"
