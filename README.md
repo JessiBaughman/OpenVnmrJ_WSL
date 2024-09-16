@@ -21,6 +21,7 @@
   - [Printing / Plotting](#printing--plotting)
   - [Default PDF Reader](#default-pdf-reader)
   - [Closing OpenVnmrJ](#closing-openvnmrj)
+  - [Enabling the Locator](#enabling-the-locator)
   - [Updating OpenVnmrJ](#updating-openvnmrj)
 - [License](#license)
 
@@ -143,6 +144,26 @@ Two features need to be installed and activated within Windows. These are the "V
 * OpenVnmrJ can be exited in the standard methods
   * File->Exit VnmrJ, close the window, or type `exit` on the command line
 * **Windows 10 (20H1-21H1):** Once closed, you will need to manually exit VcXsrv from the taskbar if desired.
+
+### Enabling the Locator
+From the OpenVnmrJ Spectroscopy User Guide:
+> The VJ Locator is a database browser that provides access to data sets, experiments, shim sets, commands, etc. … The Locator works similarly to a directory or file manager by using minimal information filtering and lists of information.
+
+It can also be used with the Panel Editor to add elements to panels See section 6 (User Space Customization) of the the User Programming Reference Guide for more info.
+
+The Locator is turned off by default. To turn it on:
+
+1.	Systemd should be enabled, as it is used by the PDF printer. To verify, open a WSL terminal and edit ```/etc/wsl.conf```. It should include the code below. If you added/modified this file, run `wsl --shutdown` in a PowerShell window to reboot the WSL distro.
+	```
+	[boot]
+	systemd=true 
+	```
+
+2.	Launch the OpenVnmrJ administrator window using the appropriate Start Menu/Desktop shortcut or run `wsl -d <distro_name> -u vnmr1 /bin/bash -lic "vnmrj admin; sleep 3"` from PowerShell or the Run (Win+R) dialog.
+
+3.	From the Configure menu, select Locator Config…
+4.	Uncheck the Locator Off box and enter a database age limit if desired.
+5. Click Ok and exit the OpenVnmrJ Administrator window.
 
 ### Updating OpenVnmrJ
 * Open a WSL terminal for your distro
