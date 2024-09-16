@@ -726,14 +726,12 @@ function setupUbuntu([string]$distribution) {
     wsl --shutdown
     wsl -d $distribution /bin/bash -lic "echo ' '"
     wsl -d $distribution -u root sed -i 's/^Out.*/Out \$\{HOME\}\/PDF/' /etc/cups/cups-pdf.conf
+    # Need a delay after lpadmin to get /etc/cups/printers.conf to be written from outside a WSL window
     if ((echo $pkgMan | Select-String apt)) {
-        wsl -d $distribution -u root /bin/bash -lic "lpadmin -p cups-pdf -v cups-pdf:/ -E -P /usr/share/ppd/cups-pdf/CUPS-PDF_opt.ppd"
+        wsl -d $distribution -u root /bin/bash -lic "lpadmin -p cups-pdf -v cups-pdf:/ -E -P /usr/share/ppd/cups-pdf/CUPS-PDF_opt.ppd; sleep 30"
     } else {
-        wsl -d $distribution -u root /bin/bash -lic "lpadmin -p cups-pdf -v cups-pdf:/ -E -P /usr/share/cups/model/CUPS-PDF_opt.ppd"
+        wsl -d $distribution -u root /bin/bash -lic "lpadmin -p cups-pdf -v cups-pdf:/ -E -P /usr/share/cups/model/CUPS-PDF_opt.ppd; sleep 30"
     }
-    wsl -d $distribution -u root /bin/bash -lic "cupsaccept cups-pdf;cupsenable cups-pdf"
-    # Need to enable/disable/enable with delays to get /etc/cups/printers.conf to be written from outside a WSL window
-    wsl -d $distribution -u root /bin/bash -lic "sleep 10;cupsdisable cups-pdf;cupsenable cups-pdf;sleep 10"
     echo ""
 }
 
