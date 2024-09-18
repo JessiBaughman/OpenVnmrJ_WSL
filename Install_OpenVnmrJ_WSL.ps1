@@ -12,14 +12,14 @@
 #                                                                            #
 ##############################################################################
 
-# Last update: September 16, 2024
+# Last update: September 18, 2024
 
 #########################
 ###   Configuration   ###
 #########################
 
 $defaultWSL = "Ubuntu-24.04" # which WSL distro to use/install by default
-$supportedWSL="Ubuntu","Ubuntu-20.04","Ubuntu-22.04","Ubuntu-24.04","AlmaLinux-9","AlmaLinux-8"
+$supportedWSL="Ubuntu-24.04","Ubuntu-22.04","AlmaLinux-9","AlmaLinux-8"
 $defaultWSLlink = "https://aka.ms/wslubuntu" # link to default distro (See: https://docs.microsoft.com/en-us/windows/wsl/install-manual)
 $minDist = 20 # minimum int version of Ubuntu supported
 $minAlma = 8 # minimum int version of Alma Linux supported
