@@ -30,7 +30,9 @@
 ## About
 <a href="https://github.com/OpenVnmrJ/OpenVnmrJ">OpenVnmrJ</a> is free and open-source software for processing NMR spectroscopy data. It runs on Ubuntu (20.04, 22.04, 24.04) and Red Hat/Alma (8, 9) Linux distributions as well as macOS 10.13+. This PowerShell script is used to install and configure Windows Subsystem for Linux and OpenVnmrJ on Windows 10+ as an alternative to installing within a virtual machine. WSL provides a native application experience and can result in a smaller installation footprint and faster application startup times.
 
-This script is for installing OpenVnmrJ. If you have already installed OpenVnmrJ to a WSL distro, see the [update section](#updating-openvnmrj) for how to update OpenVnmrJ. Do not use this script for updating.
+**This script is intended for installing OpenVnmrJ as a data station for processing only**. WSL is not fully equipped for stable instrument control. 
+
+If you have already installed OpenVnmrJ to a WSL distro, see the [update section](#updating-openvnmrj) for how to update OpenVnmrJ. Do not use this script for updating.
 
 <p>
   <br />
